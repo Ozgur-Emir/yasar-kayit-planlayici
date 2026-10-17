@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kayıt Planlayıcı · Yaşar</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+:root{--bg:#eef1f5;--card:#fff;--tx:#17212e;--mu:#5d6b7c;--ac:#1e5aa8;--nav:#0f2036;--bd:#d3dae3;--bad:#b3261e;--ok:#17683a}
+@media(prefers-color-scheme:dark){:root{--bg:#0d1520;--card:#162233;--tx:#e6edf5;--mu:#93a4b8;--ac:#6aa8ee;--nav:#09121d;--bd:#26364a;--bad:#ff8a80;--ok:#6fd49a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 "IBM Plex Sans",system-ui,sans-serif}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.nav{background:var(--nav);color:#dbe6f3;padding:16px 12px;display:flex;flex-direction:column;gap:12px}
+.brand b{display:block;font-size:16px;color:#fff}.brand small{color:#8fa6c0}
+#menu{display:flex;flex-direction:column;gap:2px}
+.m{text-align:left;background:none;border:0;color:#cfdcec;padding:9px 12px;border-radius:6px;font:inherit;cursor:pointer}
+.m.on,.m:hover{background:#1e3552;color:#fff}
+.note{font-size:12px;color:#8fa6c0;margin-top:auto}
+header{display:flex;gap:12px;align-items:center;justify-content:flex-end;padding:10px 20px;background:var(--card);border-bottom:1px solid var(--bd)}
+.chip{border:1px solid var(--bd);border-radius:6px;padding:2px 8px;font-size:12px}
+main{padding:20px;max-width:1100px}
+h1{font-size:24px;margin:0 0 12px}h2{font-size:17px;margin:20px 0 8px}h3{font-size:12px;margin:0 0 6px;color:var(--mu);font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-top:3px solid var(--ac);border-radius:8px;padding:14px}
+.big{font-size:30px;font-weight:600}.big small{font-size:15px;color:var(--mu)}
+.bar{height:6px;background:var(--bd);border-radius:3px;margin-top:8px}.bar i{display:block;height:100%;background:var(--ac);border-radius:3px}
+.tag{background:#f5e3a8;color:#5a4300;border-radius:4px;padding:1px 8px;font-size:12px}
+.tile{text-align:left;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:14px;font:inherit;color:var(--tx);cursor:pointer}
+.tile b{display:block}.tile span{color:var(--mu);font-size:13px}
+.banner{background:#fff3cd;color:#5a4300;border-radius:6px;padding:8px 12px;margin-bottom:12px}
+.strip{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 14px;margin-bottom:12px}
+.two{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;align-items:start}
+.sticky{position:sticky;top:12px}
+.course{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.course.on{border-left:3px solid var(--ac)}
+.secs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.sec{background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:4px 8px;font:12px/1.3 inherit;cursor:pointer;text-align:left}
+.sec.sel{background:var(--ac);color:var(--card);border-color:var(--ac)}
+.sec:disabled{opacity:.45;cursor:not-allowed;background:repeating-linear-gradient(45deg,var(--bg),var(--bg) 4px,var(--bd) 4px,var(--bd) 8px)}
+table{border-collapse:collapse;width:100%}
+.tt{font-size:11px;table-layout:fixed}.tt td,.tt th{border:1px solid var(--bd);height:19px;padding:0 2px;text-align:center;overflow:hidden;white-space:nowrap;color:#fff}
+.tt th{background:var(--bg);color:var(--tx);font-weight:600}
+.lt{font-size:13px;margin:8px 0}.lt th,.lt td{border-bottom:1px solid var(--bd);padding:5px 6px;text-align:left}
+button{font:inherit;font-weight:600;background:var(--ac);color:var(--card);border:0;border-radius:6px;padding:7px 14px;cursor:pointer}
+button.s{background:transparent;color:var(--ac);border:1px solid var(--ac)}
+textarea,input:not([type=checkbox]):not([type=file]){font:inherit;color:inherit;background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:6px 8px}
+textarea{width:100%;height:150px;font:12px/1.45 ui-monospace,monospace}
+label{display:block}.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.mu{color:var(--mu)}.small{font-size:12px}.bad{color:var(--bad)}.ok{color:var(--ok)}
+.modal{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:16px;z-index:9}
+.modal[hidden]{display:none}
+.box{background:var(--card);border-radius:10px;padding:18px;max-width:900px;width:100%;max-height:90vh;overflow:auto}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+@media(max-width:800px){.app{grid-template-columns:1fr}#menu{flex-direction:row;flex-wrap:wrap}.note{display:none}.two{grid-template-columns:1fr}}
+@media print{.nav,header,button,.strip{display:none}.app{display:block}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="nav"><div class="brand"><b>Yaşar Üniversitesi</b><small>Kayıt Planlayıcı</small></div><nav id="menu"></nav><p class="note">Resmî OBS değildir. Veriler yalnızca tarayıcında işlenir, hiçbir yere gönderilmez. Gerçek kayıt OBS’de yapılır.</p></aside>
+<div><header><span class="chip">2026-2027 Güz</span><span>Demo Öğrenci</span></header><main id="view"></main></div>
+</div>
+<div id="modal" class="modal" hidden><div class="box" id="mbox"></div></div>
+<script>
+const CSV=`EEE 2280;ELEKTRİK DEVRELERİ VE SİSTEMLERİ;7;Z;1;Sal 11:40-13:30|Cum 12:40-15:30;
+EEE 2280;ELEKTRİK DEVRELERİ VE SİSTEMLERİ;7;Z;2;Sal 13:40-15:30|Cum 12:40-15:30;
+EEE 3615;ELEKTROMEKANİK ENERJİ DÖNÜŞÜMÜ;6;Z;1;Pzt 08:40-11:30|Cum 10:40-12:30;
+EEE 3615;ELEKTROMEKANİK ENERJİ DÖNÜŞÜMÜ;6;Z;2;Sal 08:40-11:30|Cum 12:40-14:30;
+EEE 3718;GERİ BESLEME SİSTEMLERİ;6;Z;1;Pzt 10:40-13:30|Per 09:40-11:30;
+EEE 3718;GERİ BESLEME SİSTEMLERİ;6;Z;2;Sal 11:40-14:30|Per 11:40-13:30;
+EEE 4122;ENDÜSTRİYEL OTOMASYON;6;S;1;Sal 14:40-17:30|Cum 08:40-10:30;
+EEE 4122;ENDÜSTRİYEL OTOMASYON;6;S;2;Sal 14:40-17:30|Cum 10:40-12:30;
+ENGR 1115;PROGRAMLAMAYA GİRİŞ;5;Z;1;Sal 10:40-12:30|Çar 08:40-10:30;
+ENGR 1115;PROGRAMLAMAYA GİRİŞ;5;Z;2;Sal 08:40-10:30|Cum 08:40-10:30;
+ENGR 1115;PROGRAMLAMAYA GİRİŞ;5;Z;3;Sal 12:40-14:30|Per 08:40-10:30;
+ENGR 1115;PROGRAMLAMAYA GİRİŞ;5;Z;4;Pzt 09:40-11:30|Cum 10:40-12:30;
+ENGR 1115;PROGRAMLAMAYA GİRİŞ;5;Z;5;Pzt 11:40-13:30|Per 10:40-12:30;
+ENGR 1115;PROGRAMLAMAYA GİRİŞ;5;Z;6;Pzt 13:40-15:30|Çar 11:40-13:30;
+ENGR 2120;BİLGİSAYAR DESTEKLİ MODELLEMEYE GİRİŞ;5;Z;1;Pzt 08:40-10:30|Çar 10:40-12:30;
+ENGR 2120;BİLGİSAYAR DESTEKLİ MODELLEMEYE GİRİŞ;5;Z;2;Pzt 10:40-12:30|Çar 08:40-10:30;
+ENGR 3450;PROJE YÖNETIMI;5;Z;1;Çar 14:40-17:30;
+ENGR 3450;PROJE YÖNETIMI;5;Z;2;Çar 15:40-18:30;
+ENGR 3450;PROJE YÖNETIMI;5;Z;3;Per 14:40-17:30;
+ENGR 3450;PROJE YÖNETIMI;5;Z;4;Per 14:40-17:30;
+ENGR 4400;MÜHENDİSLİK ETİĞİ VE SEMİNER;2;Z;1;Sal 10:40-12:30;
+ENGR 4400;MÜHENDİSLİK ETİĞİ VE SEMİNER;2;Z;2;Çar 10:40-12:30;
+ENGR 4411;SÜRDÜRÜLEBİLİR KALKINMA İÇİN MÜHENDİSLİK;3;Z;1;Pzt 13:40-15:30;
+ENGR 4451;MÜHENDİSLİK UYGULAMALARI İÇİN ÜRETKEN YAPAY ZEKA;6;S;1;Cum 11:40-14:30;
+ESE 3260;RÜZGAR ENERJİSİ SİSTEMLERİ;4;S;1;Çar 14:40-17:30;
+ESE 3504;AKILLI ENERJİ SİSTEMLERİ;4;Z;1;Per 14:40-17:30;
+ESE 4112;ISITMA HAVALANDIRMA İKLİMLENDİRME VE SOĞUTMA SİSTEMLERİ;6;S;1;Sal 08:40-11:30;
+ESE 4212;ENERJİ DEPOLAMA SİSTEMLERİ;6;S;1;Sal 14:40-17:30;
+ESE 4240;YENİLENEBİLİR ENERJİ SİSTEMLERİNİN ENTEGRASYONU;6;S;1;Çar 13:40-16:30;
+ESE 4910;ENERJİ SİSTEMLERİ ANALİZİ;8;Z;1;Per 12:40-13:30|Paz 08:40-12:30;
+ESE 4910;ENERJİ SİSTEMLERİ ANALİZİ;8;Z;2;Per 12:40-13:30|Paz 12:40-16:30;
+ESE 4910;ENERJİ SİSTEMLERİ ANALİZİ;8;Z;3;Per 12:40-13:30|Paz 08:40-12:30;
+ESE 4910;ENERJİ SİSTEMLERİ ANALİZİ;8;Z;4;Per 12:40-13:30|Paz 12:40-16:30;
+ESE 4910;ENERJİ SİSTEMLERİ ANALİZİ;8;Z;5;Per 12:40-13:30|Cmt 08:40-12:30;
+ESE 4910;ENERJİ SİSTEMLERİ ANALİZİ;8;Z;6;Per 12:40-13:30|Cmt 12:40-16:30;
+HIST 1110;ATATÜRK İLKELERİ VE İNKILAP TARİHİ I;2;Z;1;Per 20:40-22:30;
+HIST 1110;ATATÜRK İLKELERİ VE İNKILAP TARİHİ I;2;Z;2;Pzt 20:40-22:30;
+HIST 1110;ATATÜRK İLKELERİ VE İNKILAP TARİHİ I;2;Z;3;Sal 20:40-22:30;
+HIST 1110;ATATÜRK İLKELERİ VE İNKILAP TARİHİ I;2;Z;4;Cum 20:40-22:30;
+HIST 1210;ATATÜRK İLKELERİ VE İNKILAP TARİHİ II;2;Z;1;Çar 18:40-20:30;
+ISG 9110;İŞ SAĞLIĞI VE GÜVENLİĞİ I;2;Z;1;Çar 18:40-20:30;
+ISG 9210;İŞ SAĞLIĞI VE GÜVENLİĞİ II;2;Z;1;Çar 20:40-22:30;
+MATH 1100;MATEMATİKSEL MANTIK;5;Z;1;Sal 12:40-14:30|Cum 14:40-16:30;
+MATH 1100;MATEMATİKSEL MANTIK;5;Z;2;Pzt 11:40-13:30|Sal 14:40-16:30;
+MATH 1100;MATEMATİKSEL MANTIK;5;Z;3;Pzt 11:40-13:30|Per 10:40-12:30;
+MATH 1100;MATEMATİKSEL MANTIK;5;Z;4;Per 12:40-14:30|Cum 16:40-18:30;
+MATH 1100;MATEMATİKSEL MANTIK;5;Z;5;Per 14:40-16:30|Cum 16:40-18:30;
+MATH 1100;MATEMATİKSEL MANTIK;5;Z;6;Pzt 13:40-15:30|Per 16:40-18:30;
+MATH 1100;MATEMATİKSEL MANTIK;5;Z;7;Pzt 15:40-17:30|Per 16:40-18:30;
+MATH 1131;ANALİZ I;7;Z;1;Sal 10:40-12:30|Çar 08:40-11:30;
+MATH 1131;ANALİZ I;7;Z;2;Sal 08:40-10:30|Çar 13:40-16:30;
+MATH 1131;ANALİZ I;7;Z;3;Sal 12:40-15:30|Per 08:40-10:30;
+MATH 1131;ANALİZ I;7;Z;4;Çar 08:40-11:30|Per 10:40-12:30;
+MATH 1131;ANALİZ I;7;Z;5;Çar 13:40-16:30|Per 14:40-16:30;
+MATH 1131;ANALİZ I;7;Z;6;Çar 08:40-11:30|Per 13:40-15:30;
+MATH 1131;ANALİZ I;7;Z;7;Çar 13:40-16:30|Cum 08:40-10:30;
+MATH 1131;ANALİZ I;7;Z;8;Per 08:40-11:30|Cum 10:40-12:30;
+MATH 1132;ANALİZ II;7;Z;1;Pzt 08:40-11:30|Sal 13:40-15:30;
+MATH 1132;ANALİZ II;7;Z;2;Pzt 13:40-16:30|Çar 12:40-14:30;
+MATH 1132;ANALİZ II;7;Z;3;Sal 08:40-11:30|Çar 14:40-16:30;
+MATH 2230;MÜHENDİSLİKTE HESAPLAMA YÖNTEMLERİ;6;Z;1;Sal 08:40-10:30|Cum 10:40-12:30;
+MATH 2260;MÜHENDİSLER İÇİN OLASILIK VE İSTATİSTİK;6;Z;1;Pzt 08:40-11:30|Çar 14:40-16:30;
+MATH 2260;MÜHENDİSLER İÇİN OLASILIK VE İSTATİSTİK;6;Z;2;Pzt 13:40-16:30|Per 08:40-10:30;
+MATH 2260;MÜHENDİSLER İÇİN OLASILIK VE İSTATİSTİK;6;Z;3;Çar 08:40-11:30|Per 10:40-12:30;
+MATH 2263;DİFERANSİYEL DENKLEMLER VE DİNAMİK SİSTEMLER;7;Z;1;Pzt 14:40-16:30|Çar 13:40-16:30;
+MATH 2263;DİFERANSİYEL DENKLEMLER VE DİNAMİK SİSTEMLER;7;Z;2;Çar 08:40-10:30|Çar 13:40-16:30;
+MATH 2263;DİFERANSİYEL DENKLEMLER VE DİNAMİK SİSTEMLER;7;Z;3;Çar 10:40-12:30|Per 08:40-11:30;
+MATH 2263;DİFERANSİYEL DENKLEMLER VE DİNAMİK SİSTEMLER;7;Z;4;Çar 08:40-10:30|Per 08:40-11:30;
+ME 2320;TERMODİNAMİK;6;Z;1;Sal 12:40-15:30|Per 12:40-14:30;
+ME 2710;MALZEME BİLİMİ;4;Z;1;Pzt 16:40-18:30|Sal 15:40-17:30;
+ME 3320;ISI VE KÜTLE TRANSFERİ;6;Z;1;Pzt 13:40-16:30|Cum 08:40-10:30;
+ME 3320;ISI VE KÜTLE TRANSFERİ;6;Z;2;Çar 10:40-13:30|Cum 14:40-16:30;
+ME 4330;HESAPLAMALI AKIŞKANLAR DİNAMİĞİNE GİRİŞ;6;S;1;Per 08:40-11:30;
+ME 4340;TURBOMAKİNELERE GİRİŞ;6;S;1;Per 14:40-17:30;
+ME 4610;MEKATRONİK MÜHENDİSLİĞİNE GİRİŞ;6;S;1;Sal 08:40-11:30;
+PHYS 1121;FİZİK I;7;Z;1;Sal 10:40-13:30|Çar 09:40-11:30;
+PHYS 1121;FİZİK I;7;Z;2;Sal 10:40-13:30|Per 12:40-14:30;
+PHYS 1121;FİZİK I;7;Z;3;Sal 09:40-12:30|Per 10:40-12:30;
+PHYS 1121;FİZİK I;7;Z;4;Sal 09:40-12:30|Cum 14:40-16:30;
+PHYS 1121;FİZİK I;7;Z;5;Sal 14:40-17:30|Per 08:40-10:30;
+PHYS 1121;FİZİK I;7;Z;6;Sal 14:40-17:30|Cum 14:40-16:30;
+PHYS 1121;FİZİK I;7;Z;7;Sal 14:40-17:30|Per 16:40-18:30;
+PHYS 1121;FİZİK I;7;Z;8;Sal 14:40-17:30|Cum 12:40-14:30;
+PHYS 1121;FİZİK I;7;Z;9;Çar 08:40-11:30|Per 14:40-16:30;
+PHYS 1121;FİZİK I;7;Z;10;Çar 08:40-11:30|Cum 12:40-14:30;
+PHYS 1121;FİZİK I;7;Z;11;Çar 14:40-17:30|Cum 08:40-10:30;
+PHYS 1121;FİZİK I;7;Z;12;Çar 14:40-17:30|Per 12:40-14:30;
+PHYS 1121;FİZİK I;7;Z;13;Çar 11:40-14:30|Cum 10:40-12:30;
+PHYS 1121;FİZİK I;7;Z;14;Sal 10:40-13:30|Çar 11:40-13:30;
+PHYS 1121;FİZİK I;7;Z;15;Sal 10:40-13:30|Çar 15:40-17:30;
+PHYS 1121;FİZİK I;7;Z;16;Sal 14:40-17:30|Çar 13:40-15:30;
+PHYS 1121;FİZİK I;7;Z;17;Sal 14:40-17:30|Çar 15:40-17:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;1;Pzt 08:40-10:30|Çar 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;2;Sal 08:40-10:30|Cum 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;3;Sal 13:40-15:30|Per 12:40-14:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;4;Çar 13:40-15:30|Cum 10:40-12:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;5;Pzt 08:40-10:30|Çar 13:40-15:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;6;Pzt 10:40-12:30|Per 12:40-14:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;7;Sal 13:40-15:30|Per 14:40-16:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;8;Çar 08:40-10:30|Cum 10:40-12:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;9;Sal 08:40-10:30|Per 12:40-14:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;10;Sal 08:40-10:30|Per 12:40-14:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;11;Sal 13:40-15:30|Per 14:40-16:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;12;Sal 08:40-10:30|Per 14:40-16:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;13;Pzt 08:40-10:30|Cum 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;14;Pzt 10:40-12:30|Çar 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;15;Çar 13:40-15:30|Cum 10:40-12:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;16;Pzt 08:40-10:30|Per 14:40-16:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;17;Pzt 10:40-12:30|Çar 13:40-15:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;18;Sal 08:40-10:30|Per 12:40-14:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;19;Çar 08:40-10:30|Cum 10:40-12:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;20;Pzt 10:40-12:30|Per 12:40-14:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;21;Sal 08:40-10:30|Cum 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;22;Sal 13:40-15:30|Per 14:40-16:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;23;Çar 13:40-15:30|Cum 10:40-12:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;24;Pzt 08:40-10:30|Per 12:40-14:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;25;Pzt 10:40-12:30|Çar 13:40-15:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;26;Sal 08:40-10:30|Per 14:40-16:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;27;Sal 13:40-15:30|Cum 10:40-12:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;28;Pzt 08:40-10:30|Per 12:40-14:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;29;Pzt 10:40-12:30|Çar 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;30;Sal 08:40-10:30|Cum 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;31;Sal 13:40-15:30|Per 14:40-16:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;32;Pzt 08:40-10:30|Per 14:40-16:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;33;Sal 13:40-15:30|Cum 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;34;Çar 08:40-10:30|Cum 10:40-12:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;35;Pzt 08:40-10:30|Per 14:40-16:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;36;Sal 08:40-10:30|Cum 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;37;Sal 13:40-15:30|Per 12:40-14:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;38;Çar 08:40-10:30|Cum 10:40-12:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;39;Pzt 10:40-12:30|Çar 13:40-15:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;40;Sal 08:40-10:30|Cum 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;41;Sal 13:40-15:30|Per 14:40-16:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;42;Çar 08:40-10:30|Cum 10:40-12:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;43;Pzt 08:40-10:30|Çar 13:40-15:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;44;Pzt 10:40-12:30|Per 12:40-14:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;45;Sal 13:40-15:30|Per 14:40-16:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;46;Çar 08:40-10:30|Cum 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;47;Pzt 08:40-10:30|Per 14:40-16:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;48;Pzt 10:40-12:30|Çar 13:40-15:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;49;Sal 08:40-10:30|Cum 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;50;Sal 13:40-15:30|Per 12:40-14:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;51;Pzt 08:40-10:30|Çar 13:40-15:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;52;Pzt 10:40-12:30|Per 12:40-14:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;53;Sal 13:40-15:30|Cum 10:40-12:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;54;Çar 08:40-10:30|Cum 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;55;Pzt 08:40-10:30|Çar 08:40-10:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;56;Pzt 10:40-12:30|Per 14:40-16:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;57;Sal 08:40-10:30|Cum 10:40-12:30;
+SOFL 1101;AKADEMİK İNGİLİZCE I;4;Z;58;Çar 13:40-15:30|Cum 08:40-10:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;1;Sal 13:40-15:30|Per 12:40-14:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;2;Sal 13:40-15:30|Cum 08:40-10:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;3;Sal 08:40-10:30|Cum 08:40-10:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;4;Pzt 08:40-10:30|Çar 08:40-10:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;5;Çar 13:40-15:30|Cum 10:40-12:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;6;Sal 08:40-10:30|Per 14:40-16:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;7;Pzt 08:40-10:30|Per 12:40-14:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;8;Sal 13:40-15:30|Per 14:40-16:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;9;Sal 13:40-15:30|Per 12:40-14:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;10;Pzt 10:40-12:30|Çar 13:40-15:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;11;Çar 08:40-10:30|Cum 10:40-12:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;12;Pzt 10:40-12:30|Per 14:40-16:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;13;Çar 08:40-10:30|Cum 08:40-10:30;
+SOFL 1102;AKADEMİK İNGİLİZCE II;4;Z;14;Sal 08:40-10:30|Cum 10:40-12:30;
+TURK 1110;TÜRK DİLİ I;2;Z;1;Pzt 18:40-20:30;
+TURK 1110;TÜRK DİLİ I;2;Z;2;Pzt 20:40-22:30;
+TURK 1110;TÜRK DİLİ I;2;Z;3;Cum 18:40-20:30;
+TURK 1110;TÜRK DİLİ I;2;Z;4;Per 20:40-22:30;
+TURK 1210;TÜRK DİLİ II;2;Z;1;Cum 20:40-22:30;
+UFND 7010;SOSYAL SORUMLULUK;1;Z;1;Sal 18:40-20:30;
+UMFD 1020;ELEŞTİREL VE ANALİTİK DÜŞÜNMENİN TEMELLERİ;2;Z;1;Cum 18:40-20:30;
+UMFD 1020;ELEŞTİREL VE ANALİTİK DÜŞÜNMENİN TEMELLERİ;2;Z;2;Cum 20:40-22:30;
+UMFD 1720;KARİYER PLANLAMA;2;Z;1;Çar 20:40-22:30;
+UMFD 1720;KARİYER PLANLAMA;2;Z;2;Çar 18:40-20:30;
+`;
+const PASSED="ENGR 1115, MATH 1100, MATH 1131, PHYS 1121, SOFL 1101, CHEM 1130, ESE 1110, MATH 1132, SOFL 1102, ENGR 2120, HIST 1110, ISG 9110, MATH 2230, MATH 2263, ME 2320, TURK 1110, EEE 2280, HIST 1210, ISG 9210, MATH 2260, ME 3330, TURK 1210, EEE 3615, EEE 3718, ESE 3504, ME 3320, ESE 3250, ENGR 3450, ESE 3404, ESE 3510, UFND 7010, ENGR 4400, ENGR 4411, UMFD 1720, ESE 4222";
+const D=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'],COL=['#2f6fd0','#d9650a','#1b7a43','#8e44c9','#c0392b','#007b83','#8a6500','#b0357a'],$=i=>document.getElementById(i);
+const tm=t=>{const[h,m]=t.split(':');return +h*60+ +m};
+const fm=x=>String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const list=t=>t.split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean);
+const clash=(a,b)=>a.slots.some(x=>b.slots.some(y=>x.d===y.d&&x.s<y.e&&y.s<x.e));
+const S={gno:3.46,passed:PASSED,failed:'',ap:161,at:183,thr:2,hi:40,lo:32,csv:CSV,want:new Set(),pick:{},page:'home',pref:{days:1,gaps:1,early:0},plans:[]};
+let C={};
+function parse(){C={};S.csv.split('\n').forEach(l=>{const f=l.split(';').map(x=>x.trim());if(f.length<6||!f[0]||isNaN(+f[2]))return;
+const slots=f[5].split('|').filter(Boolean).map(z=>{const m=z.trim().match(/^(\S+)\s+(\d+:\d+)-(\d+:\d+)$/);return m&&D.includes(m[1])?{d:D.indexOf(m[1]),s:tm(m[2]),e:tm(m[3])}:null}).filter(Boolean);
+const c=C[f[0]]=C[f[0]]||{kod:f[0],ad:f[1],akts:+f[2],tur:f[3].toUpperCase(),pre:(f[6]||'').split('+').filter(Boolean),sec:[]};c.sec.push({n:f[4],slots})})}
+const P=()=>new Set(list(S.passed)),F=()=>new Set(list(S.failed)),miss=c=>c.pre.filter(p=>!P().has(p));
+const avail=()=>Object.values(C).filter(c=>!P().has(c.kod)),lim=()=>S.gno>=S.thr?S.hi:S.lo;
+function reset(){parse();S.want=new Set();S.pick={};avail().forEach(c=>{if(!miss(c).length&&(c.tur==='Z'||F().has(c.kod)))S.want.add(c.kod)})}
+const chosen=()=>[...S.want].map(k=>C[k]),tot=()=>chosen().reduce((a,c)=>a+c.akts,0);
+const picked=()=>chosen().map(c=>({c,s:c.sec.find(x=>x.n===S.pick[c.kod])})).filter(x=>x.s);
+const lbl=s=>s.slots.map(z=>D[z.d]+' '+fm(z.s)+'-'+fm(z.e)).join(', ');
+function grid(p){let h='<table class="tt"><tr><th></th>'+D.map(d=>`<th>${d}</th>`).join('')+'</tr>';
+for(let hr=8;hr<22;hr++){h+=`<tr><th>${hr}</th>`;for(let d=0;d<7;d++){const i=p.findIndex(({s})=>s.slots.some(z=>z.d===d&&z.s<(hr+1)*60&&z.e>hr*60));
+h+=i<0?'<td></td>':`<td style="background:${COL[i%8]}">${esc(p[i].c.kod)}</td>`}h+='</tr>'}return h+'</table>'}
+function solve(L0){const L=[...L0].sort((a,b)=>a.sec.length-b.sec.length),res=[],cur=[];
+(function rec(i){if(res.length>=3000)return;if(i===L.length){res.push(cur.slice());return}
+for(const s of L[i].sec){if(cur.some(t=>clash(t.s,s)))continue;cur.push({c:L[i],s});rec(i+1);cur.pop()}})(0);return res}
+function score(p){const by=D.map(()=>[]);let early=0,gaps=0,nd=0;
+p.forEach(({s})=>s.slots.forEach(z=>{by[z.d].push(z);if(z.s<640)early++}));
+by.forEach(a=>{if(!a.length)return;nd++;a.sort((x,y)=>x.s-y.s);for(let i=1;i<a.length;i++)gaps+=Math.max(0,a[i].s-a[i-1].e)});
+return(S.pref.days?nd*100:0)+(S.pref.gaps?gaps/6:0)+(S.pref.early?early*60:0)}
+
+function home(){const t=tot(),f=[...F()].filter(k=>C[k]);
+return `<h1>Hoş geldin, Demo</h1><p class="mu">2026-2027 Güz ders kaydı için planlama aracı.</p>${f.length?`<div class="banner">Bu dönem tekrar etmen gereken ders var: ${esc(f.join(', '))}. Listeye otomatik eklendi.</div>`:''}
+<div class="cards"><div class="card"><h3>Öğrenci</h3><b>Demo Öğrenci</b><p class="mu">Enerji Sistemleri Mühendisliği<br>4. sınıf · kurgusal profil</p></div>
+<div class="card"><h3>AGNO ve AKTS sınırı</h3><div class="big">${S.gno}</div><p class="mu">Bu dönem en fazla ${lim()} AKTS</p></div>
+<div class="card"><h3>Başarılan AKTS</h3><div class="big">${S.ap} <small>/ ${S.at}</small></div><div class="bar"><i style="width:${Math.min(100,S.ap/S.at*100)}%"></i></div></div>
+<div class="card"><h3>Kayıt durumu</h3><span class="tag">Taslak</span><p class="mu">${S.want.size} ders · ${t}/${lim()} AKTS · ${picked().length} şube belirlendi</p></div></div>
+<h2>Hızlı erişim</h2><div class="cards"><button class="tile" data-go="reg"><b>Ders Kayıt</b><span>Şube seç, çakışmaları gör</span></button><button class="tile" data-go="prog"><b>Haftalık Program</b><span>Planını tablo olarak gör</span></button><button class="tile" data-go="stat"><b>Durumum</b><span>Geçilen ve kalınan dersler</span></button></div>`}
+
+function reg(){const t=tot(),l=lim(),pk=picked();
+const rows=avail().map(c=>{const m=miss(c),on=S.want.has(c.kod),cur=S.pick[c.kod];
+const al=cur?c.sec.filter(x=>x.n!==cur&&!pk.some(o=>o.c!==c&&clash(o.s,x))).map(x=>x.n):[];
+return `<div class="course ${on?'on':''}"><label><input type="checkbox" data-c="${esc(c.kod)}" ${on?'checked':''} ${m.length?'disabled':''}> <b>${esc(c.kod)}</b> ${esc(c.ad)} <span class="mu">· ${c.akts} AKTS · ${c.tur==='Z'?'zorunlu':'seçmeli'}${F().has(c.kod)?' · <b class="bad">tekrar</b>':''}</span></label>`
++(m.length?`<div class="bad small">Önkoşul eksik: ${esc(m.join(', '))}</div>`:'')
++(on?`<div class="secs">${c.sec.map(s=>{const o=pk.find(x=>x.c!==c&&clash(x.s,s)),sel=cur===s.n,lock=o&&!sel;
+return `<button class="sec ${sel?'sel':''}" data-c="${esc(c.kod)}" data-s="${esc(s.n)}" ${lock?'disabled':''}>Şube ${esc(s.n)} · ${lbl(s)}${lock?' · '+esc(o.c.kod)+' ile çakışır':''}</button>`}).join('')}</div>`
++(cur?`<div class="mu small">Şube dolarsa yedek: ${al.length?esc(al.join(', ')):'yok'}</div>`:''):'')+'</div>'}).join('');
+return `<h1>Ders Kayıt</h1><div class="strip"><span>Toplam <b class="${t>l?'bad':''}">${t}</b> / ${l} AKTS</span><span>Şube seçilen: ${pk.length}/${S.want.size}</span><button id="sug">Otomatik program önerisi</button><button id="fin" class="s">Kaydı tamamla</button></div>
+<div class="two"><div>${rows||'<p class="mu">Ders bulunamadı. Veri ve Kurallar sayfasını kontrol et.</p>'}</div><div class="sticky">${grid(pk)}</div></div>`}
+
+function prog(){const pk=picked();return `<h1>Haftalık Program</h1>${grid(pk)}<h2>Seçilen dersler</h2><table class="lt"><tr><th>Şube</th><th>Kod</th><th>Ders</th><th>Tür</th><th>AKTS</th><th>Saatler</th></tr>${pk.map(({c,s})=>`<tr><td>${esc(s.n)}</td><td>${esc(c.kod)}</td><td>${esc(c.ad)}</td><td>${c.tur}</td><td>${c.akts}</td><td>${lbl(s)}</td></tr>`).join('')||'<tr><td colspan="6" class="mu">Henüz şube seçilmedi.</td></tr>'}</table><button class="s" onclick="print()">Yazdır</button>`}
+
+function stat(){return `<h1>Durumum</h1><div class="card"><div class="row"><label>AGNO <input id="gno" type="number" step="0.01" value="${S.gno}"></label><label>Başarılan AKTS <input id="ap" type="number" value="${S.ap}"></label><label>Toplam AKTS <input id="at" type="number" value="${S.at}"></label></div><label>Geçilen dersler<textarea id="passed">${esc(S.passed)}</textarea></label><label>Kalınan dersler <input id="failed" value="${esc(S.failed)}"></label><p class="mu">Müfredat Durum ekranından ders kodlarını kopyala, virgülle ayır. Değişiklik alandan çıkınca uygulanır.</p></div>`}
+
+function data(){return `<h1>Veri ve Kurallar</h1><div class="card"><h3>Ders ve şube verisi</h3><p class="mu">Satır biçimi: kod;ad;AKTS;tür (Z/S);şube;zamanlar;önkoşullar · Zamanlar: Pzt 08:40-10:30|Çar 10:40-11:30 · Önkoşullar: KOD1+KOD2</p><textarea id="csv">${esc(S.csv)}</textarea><div class="row"><input type="file" id="file" accept=".csv,.txt"><button class="s" id="rst">Güz 2026-27 verisini geri yükle</button></div></div>
+<div class="card" style="margin-top:12px"><h3>Kurallar</h3><div class="row"><label>AGNO eşiği <input id="thr" type="number" step="0.01" value="${S.thr}"></label><label>Eşik ve üstü AKTS sınırı <input id="hi" type="number" value="${S.hi}"></label><label>Eşiğin altı AKTS sınırı <input id="lo" type="number" value="${S.lo}"></label></div><p class="mu">Varsayılan değerler yönetmelikten doğrulanmamıştır; kendi yönetmeliğine göre düzelt.</p></div>
+<div class="card" style="margin-top:12px"><h3>Kaynaklar</h3><p class="mu">Şube saatleri: OBS “2026-2027 Güz Ders Programı” PDF’leri. Ders adı ve AKTS: Enerji Sistemleri Mühendisliği Bologna müfredatı. Önkoşul verisi henüz yok.</p></div>`}
+
+const PAGES={home:'Ana Sayfa',reg:'Ders Kayıt',prog:'Haftalık Program',stat:'Durumum',data:'Veri ve Kurallar'},V={home,reg,prog,stat,data};
+function show(){$('menu').innerHTML=Object.entries(PAGES).map(([k,v])=>`<button class="m ${S.page===k?'on':''}" data-go="${k}">${v}</button>`).join('');$('view').innerHTML=V[S.page]()}
+const keep=()=>{const y=scrollY;show();scrollTo(0,y)};
+const open=h=>{$('mbox').innerHTML=h+'<div class="row"><button id="cls" class="s">Kapat</button></div>';$('modal').hidden=false};
+
+function suggest(){if(!S.want.size)return open('<p>Önce en az bir ders seç.</p>');
+open(`<h2>Otomatik program önerisi</h2><p class="mu">Seçili ${S.want.size} dersin tüm şube kombinasyonları denenir, çakışanlar elenir.</p><div class="row"><label><input type="checkbox" id="p1" ${S.pref.days?'checked':''}> Az gün</label><label><input type="checkbox" id="p2" ${S.pref.gaps?'checked':''}> Az boşluk</label><label><input type="checkbox" id="p3" ${S.pref.early?'checked':''}> 10:40’tan önce ders olmasın</label><button id="go">Hesapla</button></div><div id="res"></div>`)}
+function run(){S.pref={days:+$('p1').checked,gaps:+$('p2').checked,early:+$('p3').checked};
+const ch=chosen(),R=solve(ch);let h='';
+if(!R.length){const pr=[];for(let i=0;i<ch.length;i++)for(let j=i+1;j<ch.length;j++)if(ch[i].sec.every(x=>ch[j].sec.every(y=>clash(x,y))))pr.push(ch[i].kod+' ve '+ch[j].kod);
+h=`<p class="bad"><b>Çakışmasız program yok.</b> ${pr.length?'Her şube kombinasyonunda çakışanlar: '+esc(pr.join('; '))+'. Birini bırakmayı düşün.':'Çakışma üç veya daha fazla dersin birleşiminden geliyor; bir dersi çıkarıp tekrar dene.'}</p>`}
+else{R.sort((a,b)=>score(a)-score(b));S.plans=R.slice(0,3);
+h=`<p class="mu">${R.length>=3000?'3000’den fazla':R.length} çakışmasız program bulundu. En iyi üçü:</p><div class="plans">${S.plans.map((p,i)=>`<div class="card"><h3>Plan ${'ABC'[i]}</h3>${grid(p)}<p class="mu small">${p.map(t=>esc(t.c.kod)+' şube '+esc(t.s.n)).join(' · ')}</p><button data-ap="${i}">Bu planı uygula</button></div>`).join('')}</div>`}
+$('res').innerHTML=h}
+function finish(){const pk=picked(),t=tot(),l=lim(),ch=chosen(),nop=ch.filter(c=>!S.pick[c.kod]),mf=[...F()].filter(k=>C[k]&&!S.want.has(k));
+const cl=pk.some((a,i)=>pk.some((b,j)=>j>i&&clash(a.s,b.s)));
+const r=[[t>0,'En az bir ders seçili'],[!nop.length,'Her seçili ders için şube seçildi'+(nop.length?' (eksik: '+esc(nop.map(c=>c.kod).join(', '))+')':'')],[!cl,'Ders saatleri çakışmıyor'],[t<=l,`AKTS sınırı: ${t} / ${l}`],[ch.every(c=>!miss(c).length),'Önkoşullar sağlanıyor'],[!mf.length,'Kalınan dersler listede'+(mf.length?' (eksik: '+esc(mf.join(', '))+')':'')]];
+open(`<h2>Göndermeden önce kontrol</h2>${r.map(([b,x])=>`<div class="${b?'ok':'bad'}">${b?'✓':'✗'} ${x}</div>`).join('')}<table class="lt"><tr><th>Şube</th><th>Kod</th><th>Ders</th><th>AKTS</th></tr>${pk.map(({c,s})=>`<tr><td>${esc(s.n)}</td><td>${esc(c.kod)}</td><td>${esc(c.ad)}</td><td>${c.akts}</td></tr>`).join('')}</table>${r.every(x=>x[0])?'<p class="ok"><b>Her şey tamam.</b> Şimdi gerçek kaydı OBS’de yap.</p>':'<p class="mu">Kırmızı maddeleri düzelt.</p>'}<p class="mu small">Bu araç hiçbir şey göndermez. Kurallar senin girdiğin değerlere göre çalışır.</p>`)}
+
+document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+if(t.dataset.go){S.page=t.dataset.go;show();scrollTo(0,0);return}
+if(t.dataset.s!==undefined){const k=t.dataset.c;S.pick[k]=S.pick[k]===t.dataset.s?undefined:t.dataset.s;keep();return}
+if(t.dataset.ap!==undefined){S.plans[+t.dataset.ap].forEach(({c,s})=>{S.pick[c.kod]=s.n});$('modal').hidden=true;S.page='reg';show();return}
+const f={sug:suggest,fin:finish,go:run,rst:()=>{S.csv=CSV;reset();show()},cls:()=>{$('modal').hidden=true}}[t.id];if(f)f()});
+document.addEventListener('change',e=>{const t=e.target;
+if(t.dataset.c&&t.type==='checkbox'){if(t.checked)S.want.add(t.dataset.c);else{S.want.delete(t.dataset.c);delete S.pick[t.dataset.c]}keep();return}
+if(t.id==='file'&&t.files[0]){t.files[0].text().then(x=>{S.csv=x;reset();show()});return}
+if(t.id==='csv'){S.csv=t.value;reset();show();return}
+if(['gno','ap','at','thr','hi','lo'].includes(t.id)){S[t.id]=+t.value;show();return}
+if(t.id==='passed'||t.id==='failed'){S[t.id]=t.value;reset();show()}});
+reset();show();
+</script>
+</body>
+</html>
